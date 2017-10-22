@@ -1,6 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var {table} = require("table");
+var colors = require("colors");
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -13,7 +14,7 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
   if (err) {
     throw err;
-    console.log("Sorry, you can't connect to Bamazon right now");
+    console.log("Sorry, you can't connect to Bamazon right now".red);
   }
   showMarketPlace();
 });
@@ -22,7 +23,7 @@ function showMarketPlace() {
   connection.query("SELECT * FROM products", function(err, res) {
     if (err) {
       throw err;
-      console.log("Sorry, you can't acces the marketplace right now. Please try again.");
+      console.log("Sorry, you can't acces the marketplace right now. Please try again.".red);
     }
     else {
       // console.log(res);
@@ -65,7 +66,7 @@ function buy(id, quantity) {
   connection.query("SELECT product_name, price, stock_quantity FROM products WHERE item_id = ?", [id], function(err, res) {
     if (err) {
       throw err;
-      console.log("\nWe had some trouble accessing that item for you. Please check to make sure you had a valid Item ID and try again.\n");
+      console.log("\nWe had some trouble accessing that item for you. Please check to make sure you had a valid Item ID and try again.\n".red);
       showMarketPlace();
     }
     else{
@@ -88,7 +89,7 @@ function buy(id, quantity) {
             console.log("\nCould not place your order, please try again.\n");
           }
           else {
-            let successMessage = "\nYour order of " + quantity + " ea. of " + res[0].product_name + " was placed! Your total is $" + ((quantity * res[0].price).toFixed(2)) + ".\n";
+            let successMessage = "\nYour order of " + quantity + " ea. of " + res[0].product_name + " was placed! Your total is $" + ((quantity * res[0].price).toFixed(2)).magenta + ".\n";
             console.log(successMessage);
           };
         });

@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/jwong1219/bamazon#readme",
   "dependencies": {
+    "colors": "^1.1.2",
     "inquirer": "^3.3.0",
     "mysql": "^2.15.0",
     "table": "^4.0.2"
