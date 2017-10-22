@@ -27,7 +27,7 @@ function showMarketPlace() {
     else {
       // console.log(res);
       makeTable(res);
-      buy(5, 6);
+      promptBuy();
     }
   })
 }
@@ -65,16 +65,17 @@ function buy(id, quantity) {
   connection.query("SELECT product_name, price, stock_quantity FROM products WHERE item_id = ?", [id], function(err, res) {
     if (err) {
       throw err;
-      console.log("We had some trouble accessing that item for you. Please check to make sure you had a valid Item ID and try again.");
+      console.log("\nWe had some trouble accessing that item for you. Please check to make sure you had a valid Item ID and try again.\n");
+      showMarketPlace();
     }
     else{
       //check to see if the buy quantity is less than the in stock quantity
       if (res[0].stock_quantity === 0) {
-        let message = res[0].product_name + " is not in stock. Please check back again soon.";
+        let message = "\n" + res[0].product_name + " is not in stock. Please check back again soon.\n";
         console.log(message);
       }
       else if (res[0].stock_quantity < quantity) {
-        let message = "Your order of " + quantity + " ea. of " + res[0].product_name + " could not be filled because of insufficient stock. We only have " + res[0].stock_quantity + " in stock.";
+        let message = "\nYour order of " + quantity + " ea. of " + res[0].product_name + " could not be filled because of insufficient stock. We only have " + res[0].stock_quantity + " in stock.\n";
         console.log(message);
       }
       else {
@@ -84,14 +85,41 @@ function buy(id, quantity) {
         connection.query("UPDATE products SET ? WHERE ?", args, function (err, upRes) {
           if (err) {
             throw err;
-            console.log("Could not place your order, please try again.");
+            console.log("\nCould not place your order, please try again.\n");
           }
           else {
-            let successMessage = "Your order of " + quantity + " ea. of " + res[0].product_name + " was placed! Your total is $" + ((quantity * res[0].price).toFixed(2)) + ".";
+            let successMessage = "\nYour order of " + quantity + " ea. of " + res[0].product_name + " was placed! Your total is $" + ((quantity * res[0].price).toFixed(2)) + ".\n";
             console.log(successMessage);
           };
         });
       }
+      showMarketPlace();
     }
   });
+}
+
+function promptBuy() {
+  inquirer.prompt([
+    {
+      message: 'Enter the ID of the item you would like to order. (Type "exit" to exit)',
+      name: "chosen",
+      validate: function validateChosen(name) {
+        // console.log(parseInt(name));
+        if(name.toLowerCase() === "exit") {
+          connection.end();
+          process.exit();
+        }
+        return (parseInt(name).toString() === name);
+      }
+    },{
+      message: "How many would you like to order?",
+      name: "qty",
+      validate: function validateChosen(name) {
+        // console.log(parseInt(name));
+        return (parseInt(name).toString() === name);
+      }
+    }
+  ]).then(function(answer) {
+    buy(answer.chosen, answer.qty);
+  })
 }
