@@ -16,8 +16,37 @@ connection.connect(function(err) {
     throw err;
     console.log("Sorry, you can't connect to Bamazon right now".red);
   }
-  addItem("Dog Treats", "Food and Drink", "5.99", "100");
+  showMarketPlace();
 });
+
+function managerPrompt() {
+  inquirer.prompt([
+    {
+      message: "What would you like to?",
+      name: "command",
+      type: "list",
+      choices: ["Show All Inventory", "Show Low Inventory", "Add Inventory", "Add A New Item", "Exit"]
+    }
+  ]).then(function(answer) {
+    switch (answer.command) {
+      case "Show All Inventory":
+        showMarketPlace();
+        break;
+      case "Show Low Inventory":
+        showLowStock();
+        break;
+      case "Add Inventory":
+        promptAddStock();
+        break;
+      case "Add A New Item":
+        promptAddItem();
+        break;
+      case "Exit":
+        connection.end();
+        break;
+    }
+  })
+}
 
 function showMarketPlace() {
   connection.query("SELECT * FROM products ORDER BY department_name ASC", function(err, res) {
@@ -29,10 +58,11 @@ function showMarketPlace() {
       // console.log(res);
       makeTable(res);
     }
+    managerPrompt();
   })
 }
 
-function makeTable(tableData) {
+function makeTable(tableData, status) {
   
   let data, output;
 
@@ -47,10 +77,16 @@ function makeTable(tableData) {
           string += "$";
           string += tableData[index][key].toFixed(2);
         }
+        else if(key === "stock_quantity" && tableData[index][key] < 5) {
+          let redString = (tableData[index][key]).toString().red;
+          string += redString; 
+        }
         else {
           string += (tableData[index][key]);
         }
-      if(string) {tableRow.push(string);}
+      if(string) {
+        tableRow.push(string);
+      }
     }
     data.push(tableRow);
   }
@@ -66,8 +102,31 @@ function showLowStock() {
     }
     else {
       // console.log(res);
-      makeTable(res);
+      makeTable(res, "low");
     }
+    managerPrompt();
+  })
+}
+
+function promptAddStock() {
+  inquirer.prompt([
+    {
+      name: "chosen",
+      message: "Enter the ID of the item to increase stock: ",
+      validate: function validateChosen(name) {
+        // console.log(parseInt(name));
+        return (parseInt(name).toString() === name);
+      }
+    },{
+      name: "quantity",
+      message: "How many of these should be added to Inventory?",
+      validate: function validateChosen(name) {
+        // console.log(parseInt(name));
+        return (parseInt(name).toString() === name);
+      }
+    }
+  ]).then(function(answer) {
+    addInventory(answer.chosen, answer.quantity);
   })
 }
 
@@ -80,8 +139,33 @@ function addInventory(id, addStock) {
         throw err;
         console.log("Could not add stock to that item.");
       }
+      showMarketPlace();
     }
   );
+}
+
+function promptAddItem() {
+  inquirer.prompt([
+    {
+      name: "item_name",
+      message: "Enter the name of the item to add: ",
+    },{
+      name: "department_name",
+      message: "What department will this item be in: ",
+    },{
+      name: "price",
+      message: "What is the price of this item: ",
+    },{
+      name: "stock",
+      message: "How many of this item should be added to inventory: ",
+      validate: function validateStock(name) {
+        // console.log(parseInt(name));
+        return (parseInt(name).toString() === name);
+      }
+    }
+  ]).then(function(answer) {
+    addItem(answer.item_name, answer.department_name, answer.price, answer.stock);
+  })
 }
 
 function addItem(name, department, price, stock) {

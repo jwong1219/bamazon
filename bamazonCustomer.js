@@ -76,7 +76,7 @@ function buy(id, quantity) {
         console.log(message);
       }
       else if (res[0].stock_quantity < quantity) {
-        let message = "\nYour order of " + quantity + " ea. of " + res[0].product_name + " could not be filled because of insufficient stock. We only have " + res[0].stock_quantity + " in stock.\n".red;
+        let message = ("\nYour order of " + quantity + " ea. of " + res[0].product_name + " could not be filled because of insufficient stock. We only have " + res[0].stock_quantity + " in stock.\n").red;
         console.log(message);
       }
       else {
