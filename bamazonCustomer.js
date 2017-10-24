@@ -72,11 +72,11 @@ function buy(id, quantity) {
     else{
       //check to see if the buy quantity is less than the in stock quantity
       if (res[0].stock_quantity === 0) {
-        let message = "\n" + res[0].product_name + " is not in stock. Please check back again soon.\n";
+        let message = "\n" + res[0].product_name + " is not in stock. Please check back again soon.\n".red;
         console.log(message);
       }
       else if (res[0].stock_quantity < quantity) {
-        let message = "\nYour order of " + quantity + " ea. of " + res[0].product_name + " could not be filled because of insufficient stock. We only have " + res[0].stock_quantity + " in stock.\n";
+        let message = "\nYour order of " + quantity + " ea. of " + res[0].product_name + " could not be filled because of insufficient stock. We only have " + res[0].stock_quantity + " in stock.\n".red;
         console.log(message);
       }
       else {
@@ -86,7 +86,7 @@ function buy(id, quantity) {
         connection.query("UPDATE products SET ? WHERE ?", args, function (err, upRes) {
           if (err) {
             throw err;
-            console.log("\nCould not place your order, please try again.\n");
+            console.log("\nCould not place your order, please try again.\n".red);
           }
           else {
             let successMessage = "\nYour order of " + quantity + " ea. of " + res[0].product_name + " was placed! Your total is $" + ((quantity * res[0].price).toFixed(2)).magenta + ".\n";
